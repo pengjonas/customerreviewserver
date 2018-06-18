@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import static java.util.stream.Collectors.toList;
 import org.springframework.beans.factory.annotation.Qualifier;
 
 
@@ -44,7 +45,16 @@ public class CustomerReviewController
 		{
 			throw new ProductNotFoundException(productId);
 		}
-		return customerReviewService.getReviewsForProduct(product);
+                List<CustomerReviewModel> list = customerReviewService.getReviewsForProduct(product);
+                if (ratingFrom != null) {
+                    list = list.stream().filter(review -> review.getRating() >= ratingFrom)
+                        .collect(toList());
+                }
+                if (ratingTo != null) {
+                    list = list.stream().filter(review -> review.getRating() <= ratingTo).collect(toList());
+                }
+                return list;
+                    
 	}
 
 	@PostMapping({ "products/{productId:\\d+}/users/{userId:\\d+}/reviews" })
